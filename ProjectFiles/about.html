@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriGaze - About Us</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for checkmark icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .nav-link {
+            color: white;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #a0aec0; /* Lighter grey on hover */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Navigation Bar (reused from index.html for consistency) -->
+    <nav class="bg-gray-800 p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-white text-2xl font-bold rounded-md px-3 py-2">NUTRIGAZE</a>
+            <div class="flex space-x-4">
+                <a href="/" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Home</a>
+                <a href="/about" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">About</a>
+                <a href="/predict" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Predict</a>
+                <a href="/contact" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- About Section -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <p class="text-lg text-gray-600 mb-2">ABOUT</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">Learn More About Us</h1>
+            <p class="mt-4 text-xl text-gray-700 max-w-3xl mx-auto">
+                NutriGaze is a pioneering organization dedicated to enhancing the quality and safety of your fruits and vegetables.
+            </p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+            <!-- Left Column -->
+            <div class="md:w-1/2 bg-white p-8 rounded-lg shadow-md">
+                <p class="text-gray-700 mb-6 leading-relaxed">
+                    Our team comprises innovative scientists, technologists, and agricultural experts committed to leveraging advanced detection technologies to ensure the produce you consume is fresh, healthy, and nutritious.
+                </p>
+                <ul class="space-y-4">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <p class="text-gray-700">Comprehensive analysis and grading of fruits and vegetables based on ripeness and nutritional content.</p>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <p class="text-gray-700">Continuous monitoring of produce freshness from farm to table.</p>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <p class="text-gray-700">Innovative solutions to minimize food waste by identifying and separating rotten produce early in the supply chain.</p>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Right Column -->
+            <div class="md:w-1/2 bg-white p-8 rounded-lg shadow-md">
+                <p class="text-gray-700 mb-6 leading-relaxed">
+                    Our team is our greatest asset. We are a diverse group of experts in fields such as agricultural science, data analytics, software engineering, and food technology. Together, we bring a wealth of knowledge and experience to tackle the challenges of food quality and safety.
+                </p>
+                <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Learn More
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer (Optional - can be added later) -->
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 NutriGaze. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

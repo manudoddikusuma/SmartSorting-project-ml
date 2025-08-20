@@ -1,0 +1,12 @@
+import shutil
+import os
+
+source_path = "dataset"
+target_path = "static/assets/dataset"
+
+if os.path.exists(target_path):
+    shutil.rmtree(target_path)
+
+shutil.move(source_path, target_path)
+
+print("✅ Dataset moved successfully!")

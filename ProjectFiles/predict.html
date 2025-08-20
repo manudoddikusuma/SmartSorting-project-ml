@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriGaze - Predict Freshness</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .nav-link {
+            color: white;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #a0aec0; /* Lighter grey on hover */
+        }
+        /* Custom styling for the file input button to match the design */
+        .file-input-label {
+            display: inline-block;
+            background-color: #4CAF50; /* Green color for "Choose File" button */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 600; /* Semi-bold */
+        }
+        .file-input-label:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        /* Hide the default file input */
+        input[type="file"] {
+            display: none;
+        }
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none; /* Hidden by default */
+        }
+        /* Basic spinner animation (optional, but good for loading) */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4CAF50;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Navigation Bar (reused for consistency) -->
+    <nav class="bg-gray-800 p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-white text-2xl font-bold rounded-md px-3 py-2">NUTRIGAZE</a>
+            <div class="flex space-x-4">
+                <a href="/" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Home</a>
+                <a href="/about" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">About</a>
+                <a href="/predict" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Predict</a>
+                <a href="/contact" class="nav-link rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Predict Section -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 leading-tight">Image Classification</h1>
+            <p class="mt-4 text-xl text-gray-700 max-w-3xl mx-auto">
+                Upload an image of a fruit or vegetable to determine if it's fresh or rotten.
+            </p>
+        </div>
+
+        <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+            <form id="uploadForm" enctype="multipart/form-data" class="space-y-6">
+                <div class="flex items-center space-x-4">
+                    <label for="imageUpload" class="text-lg font-medium text-gray-700">Upload Your Image:</label>
+                    <label for="imageUpload" class="file-input-label">Choose File</label>
+                    <input type="file" id="imageUpload" name="file" accept="image/*">
+                    <span id="fileName" class="text-gray-600">No file chosen</span>
+                </div>
+                <div class="text-center">
+                    <img id="imagePreview" src="#" alt="Image Preview" class="mx-auto">
+                </div>
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    predict
+                </button>
+            </form>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="mt-8 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded-lg text-center flex items-center justify-center space-x-2 hidden">
+                <div class="spinner"></div>
+                <p class="text-lg font-semibold">Predicting freshness...</p>
+            </div>
+
+            <div id="predictionResult" class="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200 text-center hidden">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-2">Prediction:</h2>
+                <p class="text-xl text-green-700" id="predictedClass"></p>
+                <p class="text-md text-gray-600" id="confidence"></p>
+            </div>
+
+            <!-- New: Advice/Recommendation Display -->
+            <div id="adviceDisplay" class="mt-4 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-lg text-center hidden">
+                <p class="text-lg" id="adviceText"></p>
+            </div>
+
+            <div id="errorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded hidden"></div>
+        </div>
+    </div>
+
+    <!-- Footer (Optional) -->
+    <footer class="bg-gray-800 text-white text-center p-4 mt-8">
+        <p>&copy; 2024 NutriGaze. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // JavaScript to display selected file name and image preview
+        document.getElementById('imageUpload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const fileNameDisplay = document.getElementById('fileName');
+            const imagePreview = document.getElementById('imagePreview');
+
+            if (file) {
+                fileNameDisplay.textContent = file.name; // Display the actual file name
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block'; // Show the image preview
+                };
+                reader.readAsDataURL(file);
+                // Hide any previous prediction results, loading indicator, error messages, and advice
+                document.getElementById('predictionResult').classList.add('hidden');
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                document.getElementById('errorMessage').classList.add('hidden');
+                document.getElementById('adviceDisplay').classList.add('hidden'); // Hide advice
+            } else {
+                fileNameDisplay.textContent = 'No file chosen'; // Reset text if no file selected
+                imagePreview.style.display = 'none'; // Hide preview
+                imagePreview.src = '#'; // Clear image source
+            }
+        });
+
+        // JavaScript to handle form submission and send image to Flask backend
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission (which would reload the page)
+
+            const formData = new FormData(); // Create a new FormData object to send the file
+            const imageFile = document.getElementById('imageUpload').files[0]; // Get the selected file
+
+            // Get elements to display results/errors/loading/advice
+            const predictionResultDiv = document.getElementById('predictionResult');
+            const predictedClassP = document.getElementById('predictedClass');
+            const confidenceP = document.getElementById('confidence');
+            const errorMessageDiv = document.getElementById('errorMessage');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const adviceDisplay = document.getElementById('adviceDisplay'); // Get advice display div
+            const adviceText = document.getElementById('adviceText');     // Get advice text paragraph
+
+            // Basic validation: Check if a file was selected
+            if (!imageFile) {
+                errorMessageDiv.textContent = 'Please select an image to upload.';
+                errorMessageDiv.classList.remove('hidden'); // Show the error message
+                predictionResultDiv.classList.add('hidden'); // Hide result if no file
+                loadingIndicator.classList.add('hidden'); // Hide loading if no file
+                adviceDisplay.classList.add('hidden'); // Hide advice if no file
+                return; // Stop the function if no file
+            }
+
+            formData.append('file', imageFile); // Add the file to the form data with the name 'file'
+
+            // Hide previous results/errors/advice and show loading indicator
+            predictionResultDiv.classList.add('hidden');
+            errorMessageDiv.classList.add('hidden');
+            adviceDisplay.classList.add('hidden'); // Hide advice before new prediction
+            loadingIndicator.classList.remove('hidden'); // Show the loading indicator
+
+            try {
+                // Send the image to the Flask /predict route using fetch API
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json(); // Parse the JSON response from Flask
+
+                // Hide loading indicator regardless of success or failure
+                loadingIndicator.classList.add('hidden');
+
+                if (response.ok) { // Check if the HTTP response status is OK (200-299)
+                    const prediction = result.prediction.toUpperCase();
+                    const confidence = parseFloat(result.confidence); // Ensure confidence is a number
+
+                    predictedClassP.textContent = `It's ${prediction}!`;
+                    confidenceP.textContent = `Confidence: ${(confidence * 100).toFixed(2)}%`;
+                    predictionResultDiv.classList.remove('hidden'); // Show the prediction result
+
+                    // --- New: Logic for Actionable Advice ---
+                    let advice = '';
+                    if (prediction === 'ROTTEN') {
+                        advice = 'This item appears rotten. Please compost or dispose of it properly. Do not consume.';
+                        adviceDisplay.classList.remove('bg-yellow-100', 'border-yellow-400', 'text-yellow-800');
+                        adviceDisplay.classList.add('bg-red-100', 'border-red-400', 'text-red-700'); // Red for rotten advice
+                    } else if (prediction === 'FRESH') {
+                        if (confidence < 0.80) { // Example threshold: 80%
+                            advice = 'This item is fresh, but the confidence is moderate. Consider consuming it soon or re-evaluating if unsure.';
+                            adviceDisplay.classList.remove('bg-red-100', 'border-red-400', 'text-red-700');
+                            adviceDisplay.classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-800'); // Yellow for moderate confidence
+                        } else {
+                            advice = 'This item is fresh and optimal for consumption. Store as usual.';
+                            adviceDisplay.classList.remove('bg-red-100', 'border-red-400', 'text-red-700', 'bg-yellow-100', 'border-yellow-400', 'text-yellow-800');
+                            adviceDisplay.classList.add('bg-green-100', 'border-green-400', 'text-green-700'); // Green for fresh advice
+                        }
+                    }
+                    adviceText.textContent = advice;
+                    adviceDisplay.classList.remove('hidden'); // Show the advice
+                    // --- End New Advice Logic ---
+
+                } else {
+                    // Handle errors returned from the Flask backend
+                    errorMessageDiv.textContent = `Error: ${result.error || 'Unknown error'}`;
+                    errorMessageDiv.classList.remove('hidden');
+                    adviceDisplay.classList.add('hidden'); // Hide advice on error
+                }
+            } catch (error) {
+                // Handle network errors (e.g., server not running, no internet)
+                console.error('Fetch error:', error);
+                loadingIndicator.classList.add('hidden'); // Hide loading indicator on network error
+                errorMessageDiv.textContent = 'Network error or server unreachable. Please ensure the Flask app is running.';
+                errorMessageDiv.classList.remove('hidden');
+                adviceDisplay.classList.add('hidden'); // Hide advice on error
+            }
+        });
+    </script>
+
+</body>
+</html>
